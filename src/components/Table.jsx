@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import React, { useState } from "react";
 import { toast } from "react-hot-toast";
 import Form from "./Form";
+import Spinner from "./Spinner";
 import UpdatableForm from "./UpdatableForm";
 
 const Table = () => {
@@ -22,6 +23,10 @@ const Table = () => {
       return data;
     },
   });
+
+  if(isLoading){
+    return <Spinner></Spinner>
+  }
 
   const handleSetUser = (user) => {
     setUser(user)
