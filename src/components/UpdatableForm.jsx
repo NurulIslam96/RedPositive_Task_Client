@@ -64,7 +64,7 @@ const UpdatableForm = ({ refetch, setUpdateModal, user }) => {
                 name="name"
                 required
                 className="border border-gray-300 w-full p-[6px] rounded"
-                placeholder="First name"
+                placeholder={user.name}
               />
             </div>
             <div>
@@ -76,7 +76,7 @@ const UpdatableForm = ({ refetch, setUpdateModal, user }) => {
                 required
                 name="number"
                 className="border border-slate-300 w-full p-[6px] rounded"
-                placeholder="+123******"
+                placeholder={user.number}
               />
             </div>
             <div>
@@ -88,7 +88,7 @@ const UpdatableForm = ({ refetch, setUpdateModal, user }) => {
                 name="email"
                 required
                 className="border border-slate-300 w-full p-[6px] rounded"
-                placeholder="abc@gmail.com"
+                placeholder={user.email}
               />
             </div>
             <div>
