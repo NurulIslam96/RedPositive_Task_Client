@@ -71,7 +71,11 @@ const Table = () => {
           body: JSON.stringify(selectValue),
         })
           .then((res) => res.json())
-          .then((data) => console.log(data));
+          .then((data) => {
+            if(data){
+              toast.success(data.status)
+            }
+          });
       }
     } else {
       toast.error("Please Select atleast one user");
