@@ -2,9 +2,13 @@ import { useQuery } from "@tanstack/react-query";
 import React, { useState } from "react";
 import { toast } from "react-hot-toast";
 import Form from "./Form";
+import UpdatableForm from "./UpdatableForm";
 
 const Table = () => {
   const [modalStatus, setModalStatus] = useState(null);
+  const [updateModal, setUpdateModal] = useState(null)
+  const [selectValue, setSelectValue] = useState([]);
+  const [user, setUser] = useState()
 
   const {
     data: usersCollection = [],
@@ -13,17 +17,31 @@ const Table = () => {
   } = useQuery({
     queryKey: ["usersCollection"],
     queryFn: async () => {
-      const res = await fetch("http://localhost:5000/entries");
+      const res = await fetch(`${process.env.REACT_APP_api_link}/entries`);
       const data = await res.json();
       return data;
     },
   });
 
+  const handleSetUser = (user) => {
+    setUser(user)
+    setUpdateModal("Active")
+  }
+
+  const handleSelectBox = (e) => {
+    const value = e.target.value;
+    const checked = e.target.checked;
+    if (checked) {
+      setSelectValue([...selectValue, value]);
+    } else {
+      setSelectValue(selectValue.filter((prevValue) => prevValue !== value));
+    }
+  };
 
   const handleDelete = (id) => {
     const confirm = window.confirm("Do you Really want to delete?");
     if (confirm) {
-      fetch(`http://localhost:5000/delete/${id}`, {
+      fetch(`${process.env.REACT_APP_api_link}/delete/${id}`, {
         method: "DELETE",
       })
         .then((res) => res.json())
@@ -33,6 +51,25 @@ const Table = () => {
             refetch();
           }
         });
+    }
+  };
+
+  const handleSendEmail = () => {
+    if (selectValue.length > 0) {
+      const confirm = window.confirm("Do you want to send Email?");
+      if (confirm) {
+        fetch(`${process.env.REACT_APP_api_link}/sendMail`, {
+          method: "POST",
+          headers: {
+            "content-type": "application/json",
+          },
+          body: JSON.stringify(selectValue),
+        })
+          .then((res) => res.json())
+          .then((data) => console.log(data));
+      }
+    } else {
+      toast.error("Please Select atleast one user");
     }
   };
 
@@ -55,8 +92,12 @@ const Table = () => {
             {usersCollection?.map((user, i) => (
               <tr key={user._id}>
                 <th>
-                  <label>
-                    <input type="checkbox" className="checkbox" />
+                  <label onChange={(e) => handleSelectBox(e)}>
+                    <input
+                      type="checkbox"
+                      className="checkbox"
+                      value={user._id}
+                    />
                   </label>
                 </th>
                 <td>
@@ -71,7 +112,9 @@ const Table = () => {
                 <td>{user?.email}</td>
                 <td>{user?.hobbies}</td>
                 <td className="flex flex-col gap-2">
-                  <button className="btn btn-xs">Update</button>
+                  <label onClick={()=>handleSetUser(user)} htmlFor="update-modal" className="btn btn-xs">
+                    Update
+                  </label>
                   <button
                     className="btn btn-xs btn-error"
                     onClick={() => handleDelete(user._id)}
@@ -85,15 +128,26 @@ const Table = () => {
         </table>
       </div>
       {modalStatus && (
-        <Form refetch={refetch}
-        setModalStatus={setModalStatus}
-        />
+        <>
+          <Form refetch={refetch} setModalStatus={setModalStatus} />
+        </>
       )}
+      {user && updateModal && <UpdatableForm
+            user={user}
+            refetch={refetch}
+            setUpdateModal={setUpdateModal}
+          ></UpdatableForm>}
       <div className="bg-[#F2F2F2] rounded py-2 text-center">
-        <label htmlFor="modal-user" className="btn" onClick={()=>setModalStatus("Active")}>
+        <label
+          htmlFor="modal-user"
+          className="btn"
+          onClick={() => setModalStatus("Active")}
+        >
           Add New Data
         </label>
-        <button className="btn mx-5">Send</button>
+        <button className="btn mx-5" onClick={() => handleSendEmail()}>
+          Send
+        </button>
       </div>
     </>
   );

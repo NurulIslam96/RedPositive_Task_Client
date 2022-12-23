@@ -2,9 +2,9 @@ import React, { useState } from "react";
 import { toast } from "react-hot-toast";
 import CreatableSelect from "react-select/creatable";
 
-const Form = ({refetch,setModalStatus}) => {
+const UpdatableForm = ({ refetch, setUpdateModal, user }) => {
   const [hobbyCollection, setHobbyCollection] = useState([]);
-  const handleSubmit = (e) => {
+  const handleUpdate = (e) => {
     e.preventDefault();
     const form = e.target;
     if (hobbyCollection.length !== 0) {
@@ -14,8 +14,8 @@ const Form = ({refetch,setModalStatus}) => {
         email: form.email.value,
         hobbies: hobbyCollection.toString(),
       };
-      fetch(`${process.env.REACT_APP_api_link}/addEntry`, {
-        method: "POST",
+      fetch(`${process.env.REACT_APP_api_link}/updateEntry/${user._id}`, {
+        method: "PUT",
         headers: {
           "content-type": "application/json",
         },
@@ -24,9 +24,9 @@ const Form = ({refetch,setModalStatus}) => {
         .then((res) => res.json())
         .then((data) => {
           if (data.result) {
-            toast.success(data.status)
-            setModalStatus(null)
-            refetch()
+            toast.success(data.status);
+            setUpdateModal(null);
+            refetch();
           } else {
             toast.error(data.status);
           }
@@ -34,24 +34,27 @@ const Form = ({refetch,setModalStatus}) => {
     }
   };
 
-  const handleHobbies = (values) => {
+  const handleNewHobbies = (values) => {
     let hobbiesValue = [];
     values.map((value) => hobbiesValue.push(value.value));
     setHobbyCollection(hobbiesValue);
   };
   return (
     <>
-      <input type="checkbox" id="modal-user" className="modal-toggle" />
+      <input type="checkbox" id="update-modal" className="modal-toggle" />
       <div className="modal h-full">
         <div className="modal-box relative">
           <label
-            htmlFor="modal-user"
+            htmlFor="update-modal"
             className="btn btn-sm btn-circle absolute right-2 top-2"
           >
             ✕
           </label>
-          <h3 className="text-lg font-bold">ADD New entry</h3>
-          <form onSubmit={(e)=>handleSubmit(e)} className="form-control w-full">
+          <h3 className="text-lg font-bold">Update Entries</h3>
+          <form
+            onSubmit={(e) => handleUpdate(e)}
+            className="form-control w-full"
+          >
             <div>
               <label className="label">
                 <span className="label-text">Full Name</span>
@@ -95,7 +98,7 @@ const Form = ({refetch,setModalStatus}) => {
               <CreatableSelect
                 closeMenuOnSelect={false}
                 isMulti
-                onChange={(e)=>handleHobbies(e)}
+                onChange={(e) => handleNewHobbies(e)}
               />
             </div>
             <div className="text-center mt-5 ">
@@ -103,7 +106,6 @@ const Form = ({refetch,setModalStatus}) => {
                 Save
               </button>
             </div>
-            
           </form>
         </div>
       </div>
@@ -111,4 +113,4 @@ const Form = ({refetch,setModalStatus}) => {
   );
 };
 
-export default Form;
+export default UpdatableForm;
